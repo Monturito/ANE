@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ArquiStore NFT</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='/css/store.css') }}">
+</head>
+<body>
+  <div class="main-container">
+    <h1>ArquiStore NFT</h1>
+    <div class="cart">
+      <button id="cart-button" class="cart-button">Go to Pay</button>
+      <h2>Your Cart</h2>
+      <div class="cart-items-container">
+        <ul id="cart-items">
+          {% for item in cart %}
+            <li data-id="{{ item.id }}" class="cart-item">
+              <span>{{ item.name }}</span>
+              <span class="quantity">{{ item.quantity }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="products-container">
+      <ul class="product-list">
+        {% for nft in nfts %}
+          <li class="product-item">
+            <img src="{{ url_for('static', filename=nft.image_url) }}" alt="{{ nft.name }}" class="product-image">
+            <div class="product-details">
+              <h3>{{ nft.name }}</h3>
+              <p>{{ nft.price }}</p>
+              <div class="quantity-input">
+                <input type="number" value="1" min="1">
+              </div>
+              <div class="buttons">
+                <button class="add-to-cart-button" data-id="{{ nft.id }}">Add to Cart</button>
+                <button class="view-details">View Details</button>
+              </div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const cartButton = document.getElementById('cart-button');
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-button');
+
+    // Redireccionar al HTML de compra al hacer clic en el botón del carrito
+    cartButton.addEventListener('click', () => {
+      window.location.href = '/comprar.html';
+    });
+
+    // Agregar producto al carrito al hacer clic en el botón "Add to Cart"
+    addToCartButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const productId = button.dataset.id;
+        const quantityInput = button.parentNode.previousElementSibling.querySelector('input');
+        const quantity = parseInt(quantityInput.value);
+        
+        addToCart(productId, quantity);
+      });
+    });
+
+    // Función para agregar productos al carrito mediante una solicitud AJAX
+    function addToCart(productId, quantity) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/add_to_cart', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          console.log(xhr.responseText);
+          // Actualizar el contador de productos en el carrito (opcional)
+          const cartItemCount = document.getElementById('cart-item-count');
+          const currentCount = parseInt(cartItemCount.innerText);
+          cartItemCount.innerText = currentCount + quantity;
+        }
+      };
+      xhr.send(JSON.stringify({ 'nft_id': productId, 'quantity': quantity }));
+    }
+  </script>
+</body>
+</html>

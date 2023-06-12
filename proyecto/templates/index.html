@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ArquiStore NFT</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Login</h1>
+    <img src="{{ url_for('static', filename='images/nft.png') }}" alt="NFT Image">
+
+    <form action="/" method="POST">
+      <label for="username">Usuario:</label><br>
+      <input type="text" id="username" name="username" required><br>
+      
+      <label for="password">Contraseña:</label><br>
+      <input type="password" id="password" name="password" required><br>
+      
+      <input type="submit" value="Iniciar sesión">
+    </form>
+    <p>Don't have an account? <a href="register">Register here</a></p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ArquiStore NFT</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='/css/store.css') }}">
+</head>
+<body>
+  <div class="main-container">
+    <h1>ArquiStore NFT</h1>
+    <div class="cart">
+      <button id="cart-button" class="cart-button">Go to Pay</button>
+      <h2>Your Cart</h2>
+      <div class="cart-items-container">
+        <ul id="cart-items">
+          <!-- La lista de elementos en la canasta se generará dinámicamente aquí -->
+        </ul>
+        <p id="cart-total" class="cart-total">Total: $0</p>
+      </div>
+    </div>
+    <div class="products-container">
+      <ul class="product-list">
+        {% for nft in nfts %}
+          <li class="product-item">
+            <img src="{{ url_for('static', filename=nft.image_url) }}" alt="{{ nft.name }}" class="product-image">
+            <div class="product-details">
+              <h3>{{ nft.name }}</h3>
+              <p>{{ nft.price }}</p>
+              <div class="quantity-input">
+                <input type="number" value="1" min="1">
+              </div>
+              <div class="buttons">
+                <button class="add-to-cart-button" data-id="{{ nft.id }}">Add to Cart</button>
+                <button class="view-details">View Details</button>
+              </div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Modal para los detalles del producto -->
+  <div id="product-details-modal" class="modal">
+    <div class="modal-content">
+      <span id="close-modal-button" class="close">&times;</span>
+      <!-- Contenido del modal -->
+      <h2>Product Details</h2>
+      <div id="product-details-container"></div>
+    </div>
+  </div>
+
+  <script>
+    const cartButton = document.getElementById('cart-button');
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-button');
+    const viewDetailsButtons = document.querySelectorAll('.view-details');
+    const productDetailsModal = document.getElementById('product-details-modal');
+    const closeModalButton = document.getElementById('close-modal-button');
+    const productDetailsContainer = document.getElementById('product-details-container');
+
+    // Redireccionar al HTML de compra al hacer clic en el botón del carrito
+    cartButton.addEventListener('click', () => {
+      window.location.href = '/comprar.html';
+    });
+
+    // Agregar producto al carrito al hacer clic en el botón "Add to Cart"
+    addToCartButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const productId = button.dataset.id;
+        const quantityInput = button.parentNode.previousElementSibling.querySelector('input');
+        const quantity = parseInt(quantityInput.value);
+
+        addToCart(productId, quantity);
+      });
+    });
+
+    // Mostrar los detalles del producto en el modal al hacer clic en el botón "View Details"
+    viewDetailsButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const productId = button.dataset.id;
+        showProductDetails(productId);
+      });
+    });
+
+    // Función para agregar productos al carrito mediante una solicitud AJAX
+    function addToCart(productId, quantity) {
+      // ...
+    }
+
+    // Función para mostrar los detalles del producto en el modal
+    function showProductDetails(productId) {
+      // Obtener los detalles del producto mediante una solicitud AJAX
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', `/product_details/${productId}`, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          const productDetails = JSON.parse(xhr.responseText);
+          renderProductDetails(productDetails);
+          openProductDetailsModal();
+        }
+      };
+      xhr.send();
+    }
+
+    // Función para renderizar los detalles del producto en el modal
+    function renderProductDetails(productDetails) {
+      productDetailsContainer.innerHTML = `
+        <h3>${productDetails.name}</h3>
+        <p>Price: ${productDetails.price}</p>
+        <p>Description: ${productDetails.description}</p>
+      `;
+    }
+
+    // Función para abrir el modal de los detalles del producto
+    function openProductDetailsModal() {
+      productDetailsModal.style.display = 'block';
+    }
+
+    // Función para cerrar el modal de los detalles del producto
+    function closeProductDetailsModal() {
+      productDetailsModal.style.display = 'none';
+    }
+
+    // Cerrar el modal al hacer clic en el botón de cerrar
+    closeModalButton.addEventListener('click', closeProductDetailsModal);
+
+    // Cerrar el modal al hacer clic fuera del modal
+    window.addEventListener('click', event => {
+      if (event.target === productDetailsModal) {
+        closeProductDetailsModal();
+      }
+    });
+  </script>
+</body>
+</html>
