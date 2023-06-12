@@ -29,6 +29,10 @@ def login():
         return render_template('index.html', error='Invalid credentials.')
     else:
         return render_template('index.html')
+@app.route('/cart')
+def show_cart():
+    cart = session.get('cart', {})
+    return jsonify(cart), 200
 
 @app.route('/store')
 def store():
@@ -72,18 +76,30 @@ def store():
         return render_template('store.html', nfts=nfts, cart=session['cart'])
     else:
         return redirect(url_for('login'))
+    
+
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
-    data = json.loads(request.data)
-    nft_id = int(data['nft_id'])
-    quantity = int(data['quantity'])
+    data = request.get_json()  # Obtener los datos enviados en la solicitud
 
+    # Obtener productId y quantity de los datos recibidos
+    productId = data.get('productId')
+    quantity = data.get('quantity')
+
+    # Realizar operaciones para agregar el producto al carrito
+    # Aquí puedes agregar tu lógica para agregar el producto al carrito de acuerdo a tus necesidades
     cart = session.get('cart', {})
-    cart[nft_id] = cart.get(nft_id, 0) + quantity
+    cart[productId] = cart.get(productId, 0) + quantity
     session['cart'] = cart
 
-    return jsonify({'message': 'Item added to cart'}), 200
+    # Ejemplo de respuesta de éxito
+    response = {
+        'message': f'Product with ID {productId} added to cart successfully'
+    }
+
+    return jsonify(response), 200
+
 
 @app.route('/comprar.html', methods=['GET', 'POST'])
 def comprar():
@@ -121,6 +137,19 @@ def comprar():
         return render_template('comprar.html', cart=cart, nfts=nfts, subtotal=subtotal)
     else:
         return redirect(url_for('login'))
+
+@app.route('/product_details/<int:product_id>')
+def product_details(product_id):
+    # Puedes obtenerlos de una base de datos, de un archivo, o de cualquier otra fuente de datos
+    product = {
+        'id': product_id,
+        'name': 'Oli',
+        'price': 10.99,
+        'description': 'Product Description'
+    }
+
+    return jsonify(product)
+
 
 @app.route('/remove_from_cart', methods=['POST'])
 def remove_from_cart():

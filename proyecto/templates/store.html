@@ -30,7 +30,7 @@
               </div>
               <div class="buttons">
                 <button class="add-to-cart-button" data-id="{{ nft.id }}">Add to Cart</button>
-                <button class="view-details">View Details</button>
+                <button class="view-details" data-id="{{ nft.id }}" data-target="product-details-modal" >Ver más</button>
               </div>
             </div>
           </li>
@@ -56,6 +56,22 @@
     const productDetailsModal = document.getElementById('product-details-modal');
     const closeModalButton = document.getElementById('close-modal-button');
     const productDetailsContainer = document.getElementById('product-details-container');
+    const cartItemsContainer = document.getElementById('cart-items-container');
+
+    fetch('/cart')
+      .then(response => response.json())
+      .then(cartData => {
+        // Generar el HTML para mostrar los elementos del carrito
+        const cartItemsHTML = Object.entries(cartData).map(([productId, quantity]) => {
+          return `<p>Product ID: ${productId}, Quantity: ${quantity}</p>`;
+        }).join('');
+
+        // Insertar el HTML generado en el contenedor
+        cartItemsContainer.innerHTML = cartItemsHTML;
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
 
     // Redireccionar al HTML de compra al hacer clic en el botón del carrito
     cartButton.addEventListener('click', () => {
@@ -66,8 +82,11 @@
     addToCartButtons.forEach(button => {
       button.addEventListener('click', () => {
         const productId = button.dataset.id;
+        console.log(productId)
         const quantityInput = button.parentNode.previousElementSibling.querySelector('input');
+        console.log(quantityInput)
         const quantity = parseInt(quantityInput.value);
+        console.log(quantity)
 
         addToCart(productId, quantity);
       });
@@ -77,13 +96,42 @@
     viewDetailsButtons.forEach(button => {
       button.addEventListener('click', () => {
         const productId = button.dataset.id;
+        const modalId = button.dataset.target; // Obtener el ID del modal desde el atributo data-target
+        const modal = document.getElementById(modalId); // Obtener el elemento del modal
+
+        const quantityInput = button.parentNode.previousElementSibling.querySelector('input');
+        const quantity = parseInt(quantityInput.value);
+
         showProductDetails(productId);
+        openModal(modal);
       });
     });
 
+    function openModal(modal) {
+      modal.style.display = 'block';
+    }
+
     // Función para agregar productos al carrito mediante una solicitud AJAX
     function addToCart(productId, quantity) {
-      // ...
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/add_to_cart', true); // Ruta del servidor para agregar al carrito
+      xhr.setRequestHeader('Content-Type', 'application/json');
+
+      // Datos del producto y la cantidad a enviar al servidor
+      const data = {
+        productId: productId,
+        quantity: quantity
+      };
+
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          // Realizar acciones adicionales según la respuesta del servidor
+          console.log(response.message);
+        }
+      };
+
+      xhr.send(JSON.stringify(data));
     }
 
     // Función para mostrar los detalles del producto en el modal
@@ -96,6 +144,7 @@
         if (xhr.status === 200) {
           const productDetails = JSON.parse(xhr.responseText);
           renderProductDetails(productDetails);
+
           openProductDetailsModal();
         }
       };
@@ -104,6 +153,8 @@
 
     // Función para renderizar los detalles del producto en el modal
     function renderProductDetails(productDetails) {
+
+
       productDetailsContainer.innerHTML = `
         <h3>${productDetails.name}</h3>
         <p>Price: ${productDetails.price}</p>
