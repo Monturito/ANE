@@ -3,6 +3,7 @@
 <head>
   <title>ArquiStore NFT</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='/css/store.css') }}">
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 </head>
 <body>
   <div class="main-container">
@@ -14,7 +15,7 @@
         <ul id="cart-items">
           <!-- La lista de elementos en la canasta se generará dinámicamente aquí -->
         </ul>
-        <p id="cart-total" class="cart-total">Total: $0</p>
+        <p id="cart-total" class="cart-total">Total: Token ARQUI</p><div id="valor_cambiante">0</div>
       </div>
     </div>
     <div class="products-container">
@@ -24,12 +25,12 @@
             <img src="{{ url_for('static', filename=nft.image_url) }}" alt="{{ nft.name }}" class="product-image">
             <div class="product-details">
               <h3>{{ nft.name }}</h3>
-              <p>{{ nft.price }}</p>
+              <p class="price">{{ nft.price }}</p>
               <div class="quantity-input">
                 <input type="number" value="1" min="1">
               </div>
               <div class="buttons">
-                <button class="add-to-cart-button" data-id="{{ nft.id }}">Add to Cart</button>
+                <button class="add-to-cart-button" data-id="{{ nft.id }}" data-price="{{ nft.price }}">Add to Cart</button>
                 <button class="view-details" data-id="{{ nft.id }}" data-target="product-details-modal" >Ver más</button>
               </div>
             </div>
@@ -48,7 +49,7 @@
       <div id="product-details-container"></div>
     </div>
   </div>
-
+  
   <script>
     const cartButton = document.getElementById('cart-button');
     const addToCartButtons = document.querySelectorAll('.add-to-cart-button');
@@ -57,6 +58,7 @@
     const closeModalButton = document.getElementById('close-modal-button');
     const productDetailsContainer = document.getElementById('product-details-container');
     const cartItemsContainer = document.getElementById('cart-items-container');
+    var a = 0;
 
     fetch('/cart')
       .then(response => response.json())
@@ -79,17 +81,33 @@
     });
 
     // Agregar producto al carrito al hacer clic en el botón "Add to Cart"
-    addToCartButtons.forEach(button => {
+    /*addToCartButtons.forEach(button => {
       button.addEventListener('click', () => {
-        const productId = button.dataset.id;
-        console.log(productId)
-        const quantityInput = button.parentNode.previousElementSibling.querySelector('input');
-        console.log(quantityInput)
-        const quantity = parseInt(quantityInput.value);
-        console.log(quantity)
-
-        addToCart(productId, quantity);
+        //const productId = button.dataset.id;
+        //console.log(productId);
+        //const quantityInput = button.parentNode.previousElementSibling.querySelector('input');
+        //console.log(quantityInput);
+        //const quantity = parseInt(quantityInput.value);
+        //console.log(quantity);
+        var b = $(this).parent(".product-details").find("#prueba").text();
+        console.log('dato',b);
+        $('#valor_cambiante').text($('.price').text());
+        //addToCart(productId, quantity);
       });
+    });*/
+    $('.add-to-cart-button').on('click',function(e){
+      var b = $(this).parent().parent('.product-details').find('.price').text();
+      const productId = $(this).data('id');
+      const quantity = $(this).parent().parent('.product-details').find('.quantity-input').children().val();
+      //const productId = button.dataset.id;
+      //console.log(productId);
+      //const quantityInput = button.parentNode.previousElementSibling.querySelector('input');
+      //console.log(quantityInput);
+      //const quantity = parseInt(quantityInput.value);
+      //console.log(quantity);
+      a = a + parseInt(b);
+      $('#valor_cambiante').text(a);
+      addToCart(productId, quantity);
     });
 
     // Mostrar los detalles del producto en el modal al hacer clic en el botón "View Details"
@@ -131,7 +149,7 @@
         }
       };
 
-      xhr.send(JSON.stringify(data));
+      //xhr.send(JSON.stringify(data));
     }
 
     // Función para mostrar los detalles del producto en el modal
